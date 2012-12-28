@@ -545,6 +545,7 @@ static void help(void)
 		"  -U --upload file\t\tRead firmware from device into <file>\n"
 		"  -D --download file\t\tWrite firmware from <file> into device\n"
 		"  -R --reset\t\t\tIssue USB Reset signalling once we're finished\n"
+		"  -f --force-suffix\t\t\tForce sufix checking and fail if missing or wrong\n"
 		"  -s --dfuse-address address\tST DfuSe mode, specify target address for\n"
 		"\t\t\t\traw file download or upload. Not applicable for\n"
 		"\t\t\t\tDfuSe file (.dfu) downloads\n"
@@ -578,6 +579,7 @@ static struct option opts[] = {
 	{ "upload", 1, 0, 'U' },
 	{ "download", 1, 0, 'D' },
 	{ "reset", 0, 0, 'R' },
+	{ "force-suffix", 0, 0, 'f' },
 	{ "dfuse-address", 1, 0, 's' }
 };
 
@@ -607,6 +609,7 @@ int main(int argc, char **argv)
 	unsigned char active_alt_name[MAX_DESC_STR_LEN+1];
 	char *end;
 	int final_reset = 0;
+	int force_suffix = 0;
 	int ret;
 	int dfuse_device = 0;
 	const char *dfuse_options = NULL;
@@ -616,7 +619,7 @@ int main(int argc, char **argv)
 
 	while (1) {
 		int c, option_index = 0;
-		c = getopt_long(argc, argv, "hVvled:p:c:i:a:t:U:D:Rs:", opts,
+		c = getopt_long(argc, argv, "hVvled:p:c:i:a:t:U:D:Rs:f", opts,
 				&option_index);
 		if (c == -1)
 			break;
@@ -689,6 +692,9 @@ int main(int argc, char **argv)
 			break;
 		case 's':
 			dfuse_options = optarg;
+			break;
+		case 'f':
+			force_suffix = 1;
 			break;
 		default:
 			help();
@@ -1124,7 +1130,11 @@ status_again:
 		if (ret < 0)
 			exit(1);
 		if (ret == 0) {
-			fprintf(stderr, "Warning: File has no DFU suffix\n");
+			if (force_suffix) {
+				fprintf(stderr, "Error: File has no DFU suffix\n");
+				exit(1);
+			} else
+				fprintf(stderr, "Warning: File has no DFU suffix\n");
 		} else if (file.bcdDFU != 0x0100 && file.bcdDFU != 0x11a) {
 			fprintf(stderr, "Unsupported DFU file revision "
 				"%04x\n", file.bcdDFU);
@@ -1132,12 +1142,22 @@ status_again:
 		}
 		if (file.idVendor != 0xffff &&
 		    dif->vendor != file.idVendor) {
-			fprintf(stderr, "Warning: File vendor ID %04x does "
+			if (force_suffix) {
+				fprintf(stderr, "Error: File vendor ID %04x does "
+				"not match device %04x\n", file.idVendor, dif->vendor);
+				exit(1);
+			} else
+				fprintf(stderr, "Warning: File vendor ID %04x does "
 				"not match device %04x\n", file.idVendor, dif->vendor);
 		}
 		if (file.idProduct != 0xffff &&
 		    dif->product != file.idProduct) {
-			fprintf(stderr, "Warning: File product ID %04x does "
+			if (force_suffix) {
+				fprintf(stderr, "Error: File product ID %04x does "
+				"not match device %04x\n", file.idProduct, dif->product);
+				exit(1);
+			} else
+				fprintf(stderr, "Warning: File product ID %04x does "
 				"not match device %04x\n", file.idProduct, dif->product);
 		}
 		if (dfuse_device || dfuse_options || file.bcdDFU == 0x11a) {
