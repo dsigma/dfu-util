@@ -30,6 +30,7 @@
 #include <err.h>
 #include <sysexits.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "portable.h"
 #include "dfu.h"
@@ -211,7 +212,7 @@ int main(int argc, char **argv)
 	const char *dfuse_options = NULL;
 	int detach_delay = 5;
 
-	file.name = NULL;
+	memset(&file, 0, sizeof(file));
 
 	/* make sure all prints are flushed */
 	setvbuf(stdout, NULL, _IONBF, 0);
@@ -580,19 +581,9 @@ status_again:
 		close(fd);
 		break;
 	case MODE_DOWNLOAD:
-		file.filep = fopen(file.name, "rb");
-		if (file.filep == NULL)
-			err(EX_IOERR, "Could not open %s for reading", file.name);
 
-		ret = parse_dfu_suffix(&file);
-		if (ret < 0)
-			exit(1);
-		if (ret == 0) {
-			errx(EX_IOERR, "Warning: File has no DFU suffix");
-		} else if (file.bcdDFU != 0x0100 && file.bcdDFU != 0x11a) {
-			errx(EX_IOERR, "Unsupported DFU file revision "
-				"%04x", file.bcdDFU);
-		}
+		dfu_load_file(&file, 1, 0);
+
 		if (file.idVendor != 0xffff &&
 		    dfu_root->vendor != file.idVendor) {
 			errx(EX_IOERR, "Warning: File vendor ID %04x does "
@@ -611,7 +602,6 @@ status_again:
 			if (dfuload_do_dnload(dfu_root, transfer_size, &file) < 0)
 				exit(1);
 	 	}
-		fclose(file.filep);
 		break;
 	default:
 		errx(EX_IOERR, "Unsupported mode: %u", mode);
