@@ -81,6 +81,14 @@ uint32_t crc32_byte(uint32_t accum, uint8_t delta)
         return crc32_table[(accum ^ delta) & 0xff] ^ (accum >> 8);
 }
 
+void *dfu_malloc(size_t size)
+{
+	void *ptr = malloc(size);
+	if (ptr == NULL)
+		errx(EX_SOFTWARE, "Cannot allocate memory of size %d bytes", (int)size);
+	return (ptr);
+}
+
 /* reads the filep and name member, fills in all others
    returns 0 if no DFU suffix
    returns positive if valid DFU suffix
@@ -112,12 +120,7 @@ int parse_dfu_suffix(struct dfu_file *file)
 		return 0;
 	}
 
-	firmware = (unsigned char*) malloc(file->size);
-	if (!firmware) {
-		errx(EX_IOERR, "Unable to allocate file buffer for firmware.");
-		exit(1);
-	}
-
+	firmware = dfu_malloc(file->size);
 	ret = fread(firmware, 1, file->size, file->filep);
 	if (ret < 0) {
 		errx(EX_IOERR, "Could not read file");
@@ -227,9 +230,7 @@ int generate_dfu_suffix(struct dfu_file *file)
 	rewind(file->filep);
 
 	/* Make space for all but CRC */
-	firmware = (unsigned char*) malloc(file->size + file->suffixlen - 4);
-	if (!firmware)
-		errx(EX_IOERR, "Unable to allocate file buffer for firmware.");
+	firmware = dfu_malloc(file->size + file->suffixlen - 4);
 
 	ret = fread(firmware, 1, file->size, file->filep);
 	if (ret < 0) {

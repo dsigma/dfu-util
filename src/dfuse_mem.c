@@ -25,6 +25,8 @@
 #include <err.h>
 #include <sysexits.h>
 
+#include "dfu_file.h"
+
 #include "dfuse_mem.h"
 
 extern int verbose;
@@ -33,9 +35,7 @@ int add_segment(struct memsegment **segment_list, struct memsegment segment)
 {
 	struct memsegment *new_element;
 
-	new_element = malloc(sizeof(struct memsegment));
-	if (!new_element)
-		return -ENOMEM;
+	new_element = dfu_malloc(sizeof(struct memsegment));
 	*new_element = segment;
 	new_element->next = NULL;
 
@@ -95,9 +95,7 @@ struct memsegment *parse_memory_layout(char *intf_desc)
 	struct memsegment *segment_list = NULL;
 	struct memsegment segment;
 
-	name = malloc(strlen(intf_desc));
-	if (!name)
-		errx(EX_IOERR, "Cannot allocate memory");
+	name = dfu_malloc(strlen(intf_desc));
 
 	ret = sscanf(intf_desc, "@%[^/]%n", name, &scanned);
 	if (ret < 1) {
@@ -109,9 +107,7 @@ struct memsegment *parse_memory_layout(char *intf_desc)
 	printf("DfuSe interface name: \"%s\"\n", name);
 
 	intf_desc += scanned;
-	typestring = malloc(strlen(intf_desc));
-	if (!typestring)
-		errx(EX_IOERR, "Cannot allocate memory");
+	typestring = dfu_malloc(strlen(intf_desc));
 
 	while (ret = sscanf(intf_desc, "/0x%x/%n", &address, &scanned),
 	       ret > 0) {
