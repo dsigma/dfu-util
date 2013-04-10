@@ -27,6 +27,7 @@
 #include <err.h>
 #include <sysexits.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "dfu_file.h"
 
@@ -127,6 +128,21 @@ void *dfu_malloc(size_t size)
 	if (ptr == NULL)
 		errx(EX_SOFTWARE, "Cannot allocate memory of size %d bytes", (int)size);
 	return (ptr);
+}
+
+uint32_t dfu_file_write_crc(int f, uint32_t crc, const void *buf, int size)
+{
+	int x;
+
+	/* compute CRC */
+	for (x = 0; x != size; x++)
+		crc = crc32_byte(crc, ((uint8_t *)buf)[x]);
+
+	/* write data */
+	if (write(f, buf, size) != size)
+		err(EX_IOERR, "Could not write %d bytes to file %d", size, f);
+
+	return (crc);
 }
 
 /* reads the filep and name member, fills in all others
