@@ -19,10 +19,10 @@
 #include <stdint.h>
 #include "quirks.h"
 
-int quirks = 0;
-
-void set_quirks(uint16_t vendor, uint16_t product, uint16_t bcdDevice)
+uint16_t get_quirks(uint16_t vendor, uint16_t product, uint16_t bcdDevice)
 {
+	uint16_t quirks = 0;
+
 	/* Device returns bogus bwPollTimeout values */
 	if (vendor == VENDOR_OPENMOKO ||
 	    vendor == VENDOR_FIC ||
@@ -39,4 +39,6 @@ void set_quirks(uint16_t vendor, uint16_t product, uint16_t bcdDevice)
 	if (vendor == VENDOR_MIDIMAN &&
 	    product == PRODUCT_SONICA)
 		quirks |= QUIRK_TRANSFERS64;
+
+	return (quirks);
 }
