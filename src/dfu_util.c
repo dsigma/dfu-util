@@ -122,13 +122,9 @@ static void probe_configuration(libusb_device *dev, struct libusb_device_descrip
 
 			for (alt_idx = 0; alt_idx < cfg->interface[intf_idx].num_altsetting;
 			     alt_idx++) {
-				void *extra;
-				int extra_len;
+				intf = &uif->altsetting[alt_idx];
 
-				extra = cfg->interface[intf_idx].altsetting[alt_idx].extra;
-				extra_len = cfg->interface[intf_idx].altsetting[alt_idx].extra_length;
-
-				ret = find_descriptor(extra, extra_len, USB_DT_DFU,
+				ret = find_descriptor(intf->extra, intf->extra_length, USB_DT_DFU,
 				      &func_dfu, sizeof(func_dfu));
 				if (ret > -1)
 					goto found_dfu;
@@ -136,6 +132,7 @@ static void probe_configuration(libusb_device *dev, struct libusb_device_descrip
 				if (intf->bInterfaceClass != 0xfe ||
 				    intf->bInterfaceSubClass != 1)
 					continue;
+
 				has_dfu = 1;
 			}
 		}
