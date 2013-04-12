@@ -241,6 +241,8 @@ int main(int argc, char **argv)
 			break;
 		case 'e':
 			mode = MODE_DETACH;
+			match_iface_alt_index = 0;
+			match_iface_index = 0;
 			break;
 		case 'E':
 			detach_delay = atoi(optarg);
@@ -333,7 +335,7 @@ int main(int argc, char **argv)
 		 * with same vendor/product ID, since during DFU we need to do
 		 * a USB bus reset, after which the target device will get a
 		 * new address */
-		errx(EX_IOERR, "More than one DFU capable USB device found!"
+		errx(EX_IOERR, "More than one DFU capable USB device found! "
 		       "Try `--list' and specify the serial number "
 		       "or disconnect all but one device\n");
 	}
@@ -604,6 +606,11 @@ status_again:
 			if (dfuload_do_dnload(dfu_root, transfer_size, &file) < 0)
 				exit(1);
 	 	}
+		break;
+	case MODE_DETACH:
+		if (dfu_detach(dfu_root->dev_handle, dfu_root->interface, 1000) < 0) {
+			errx(EX_IOERR, "can't detach");
+		}
 		break;
 	default:
 		errx(EX_IOERR, "Unsupported mode: %u", mode);
