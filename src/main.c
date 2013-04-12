@@ -151,7 +151,7 @@ static void help(void)
 		"\t\t\t\tby name or by number\n");
 	fprintf(stderr, "  -t --transfer-size <size>\tSpecify the number of bytes per USB Transfer\n"
 		"  -U --upload <file>\t\tRead firmware from device into <file>\n"
-		"  -Z --upload-size\t\tSpecify the expected upload size in bytes\n"
+		"  -Z --upload-size <bytes>\t\tSpecify the expected upload size in bytes\n"
 		"  -D --download <file>\t\tWrite firmware from <file> into device\n"
 		"  -R --reset\t\t\tIssue USB Reset signalling once we're finished\n"
 		"  -s --dfuse-address <address>\tST DfuSe mode, specify target address for\n"
