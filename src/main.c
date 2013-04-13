@@ -213,6 +213,7 @@ int main(int argc, char **argv)
 	int fd;
 	const char *dfuse_options = NULL;
 	int detach_delay = 5;
+	int dfu_has_suffix = 1;
 
 	memset(&file, 0, sizeof(file));
 
@@ -296,6 +297,7 @@ int main(int argc, char **argv)
 			break;
 		case 's':
 			dfuse_options = optarg;
+			dfu_has_suffix = 0;
 			break;
 		default:
 			help();
@@ -584,9 +586,9 @@ status_again:
 		}
 		close(fd);
 		break;
-	case MODE_DOWNLOAD:
 
-		dfu_load_file(&file, 1, 0);
+	case MODE_DOWNLOAD:
+		dfu_load_file(&file, dfu_has_suffix, 0);
 
 		if (file.idVendor != 0xffff &&
 		    dfu_root->vendor != file.idVendor) {
