@@ -570,7 +570,7 @@ status_again:
 	switch (mode) {
 	case MODE_UPLOAD:
 		/* open for "exclusive" writing */
-		fd = open(file.name, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0600);
+		fd = open(file.name, O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0666);
 		if (fd < 0)
 			err(EX_IOERR, "Cannot open file %s for writing", file.name);
 
