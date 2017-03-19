@@ -193,7 +193,7 @@ static void help(void)
 		"  -Z --upload-size <bytes>\tSpecify the expected upload size in bytes\n"
 		"  -D --download <file>\t\tWrite firmware from <file> into device\n"
 		"  -R --reset\t\t\tIssue USB Reset signalling once we're finished\n"
-	    "  -r --reset-stm32\t\t\tFollow STM32 DFU reset procedures to start firmware\n"
+	    "  -r --reset-stm32\t\tFollow STM32 DFU reset procedures to start firmware\n"
 		"  -s --dfuse-address <address>\tST DfuSe mode, specify target address for\n"
 		"\t\t\t\traw file download or upload. Not applicable for\n"
 		"\t\t\t\tDfuSe file (.dfu) downloads\n"
